@@ -1,0 +1,66 @@
+body {
+
+  background-color: rgb(53, 51, 68);
+
+}
+
+:root {
+
+  --board-width: 400px;
+  --square-width: calc(var(--board-width)/8);
+  --piece-scale: 0.92;
+  
+}
+
+
+#gameboard {
+
+  width: var(--board-width);
+  /* height: var(--board-width); */
+  display: flex;
+  flex-wrap: wrap;
+
+  background-color: rgb(255, 255, 255);
+  border-radius: 4%;
+}
+
+.square {
+
+  background-color: darkcyan;
+  width: var(--square-width);
+  height: var(--square-width);
+}
+
+.white {
+
+  background-color: transparent;
+}
+
+.black {
+
+  background-color: royalblue;
+  border-radius: 0%;
+}
+
+
+.piece {
+
+  width: calc(var(--square-width)* var(--piece-scale));
+  height: calc(var(--square-width)* var(--piece-scale));
+  margin: calc( (var(--square-width) - (var(--square-width)* var(--piece-scale)))/2 );
+
+  /* background-color: rgba(248, 245, 48, 0.801); */
+
+}
+
+.piece svg {
+
+  width: calc(var(--square-width)* var(--piece-scale));
+  height: calc(var(--square-width)* var(--piece-scale));
+
+  /* margin: 10px; */
+  /* margin: calc( (var(--square-width) - (var(--square-width)* var(--piece-scale)))/2 ); */
+ 
+  background-color: transparent;
+}
+
