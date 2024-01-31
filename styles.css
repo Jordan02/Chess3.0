@@ -6,7 +6,7 @@ body {
 
 :root {
 
-  --board-width: 400px;
+  --board-width: 600px;
   --square-width: calc(var(--board-width)/8);
   --piece-scale: 0.92;
   
@@ -43,20 +43,25 @@ body {
 }
 
 
-.piece {
+.player {
 
-  width: calc(var(--square-width)* var(--piece-scale));
-  height: calc(var(--square-width)* var(--piece-scale));
-  margin: calc( (var(--square-width) - (var(--square-width)* var(--piece-scale)))/2 );
-
-  /* background-color: rgba(248, 245, 48, 0.801); */
+  display: flex;
+  /* justify-content: center; */
+  z-index: 1;
+  position: relative;
+  width: calc(var(--square-width));
+  height: calc(var(--square-width));
+  /* background-color: rgba(248, 245, 48, 0.801);  */
 
 }
 
-.piece svg {
-
+.piece {
+  
+  position: absolute;
+  z-index: 9;
   width: calc(var(--square-width)* var(--piece-scale));
   height: calc(var(--square-width)* var(--piece-scale));
+  margin: calc( (var(--square-width) - (var(--square-width)* var(--piece-scale)))/2 );
 
   /* margin: 10px; */
   /* margin: calc( (var(--square-width) - (var(--square-width)* var(--piece-scale)))/2 ); */
@@ -64,3 +69,35 @@ body {
   background-color: transparent;
 }
 
+.perks {
+
+  position: absolute;
+  /* width: fit-content; */
+  width: calc(var(--square-width)); */
+  height: calc(var(--square-width)); */
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.perks img{
+  
+  position: relative;
+  bottom: 0;
+  z-index: 10;
+  height: calc(var(--square-width)/3)
+}
+
+.perks img:hover {
+
+  /* height: calc(var(--square-width)/2);
+  transform: translate(0, -8px );  */
+  
+
+}
+
+.perks :hover {
+
+  
+  transform: scale(2);
+
+}
