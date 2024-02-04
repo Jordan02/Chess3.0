@@ -1,8 +1,8 @@
 const gameBoard = document.querySelector("#gameboard")
 const infoDisplay = document.querySelector("#info-display")
+const body = document.getElementsByTagName("body")[0]
 
-
-
+document.body.style.cursor = 'src/killstreaks/duckingjam.png'
 
 const startPieces2 = [
 
@@ -24,73 +24,126 @@ boardImage.setAttribute("src", 'src/chessboards/green_white.png')
 boardImage.classList.add("chessboard")
 gameBoard.append(boardImage)
 
-gameBoard.addEventListener('mousemove', returnBoardPos)
+// //move
+// gameBoard.addEventListener('mousemove', returnBoardPos)
+// function returnBoardPos(e) {
 
-function returnBoardPos(e) {
+  // //returns correct file and rank position as per returnArrayPos() in chess3.js
+  // var x = Math.abs(e.clientX - boardImage.getBoundingClientRect().left);
+  // var y = Math.abs(e.clientY - boardImage.getBoundingClientRect().top);
+  // var file = Math.floor(x*8/(boardImage.clientWidth))
+  // var rank = 7 - Math.floor(y*8/(boardImage.clientHeight))
 
-    var x = Math.abs(e.clientX - boardImage.getBoundingClientRect().left);
-    var y = Math.abs(e.clientY - boardImage.getBoundingClientRect().top);
-    var col = Math.floor(x*8/(boardImage.clientWidth))
-    var row = 7 - Math.floor(y*8/(boardImage.clientHeight))
+//   console.log(rank,':',file)
+// }
 
-    console.log(row,':',col)
 
-}
-
-function returnArrayPos(pos){
-
-  const row = 7 - Math.floor((pos/8))
-  const col = pos - Math.floor((pos/8))*8
-
-  return [row,col]
-
-  // todo: probably need to add out of bound error catches here?
-
-}
 
 function InitBoard(){
+  startPieces2.forEach((startpiece, i) => {
 
-const peice = document.createElement("div")
+    if(startpiece !== '') {
 
-// retrieves square position from peice array
-const getpos = returnArrayPos(55)
-const squareclass = 'square-'+ getpos[0].toString() + getpos[1].toString()
-peice.classList.add(squareclass)
+      const piece = document.createElement('piece')
 
-gameBoard.append(peice)
+      // instantiate intial peices 
+      const getpos = returnArrayPos(i)
+      const squareclass = 'F' + getpos[0].toString() + '-R' +getpos[1].toString()
+      piece.classList.add(startpiece)
+      piece.classList.add(squareclass)
+      piece.setAttribute("draggable",true)
 
-console.log(squareclass)
+      // adding image
+      const pieceImage = document.createElement("img")
+      const url = 'src/peices/merida/' + startpiece + '.svg'
+      pieceImage.setAttribute("src", url)
+      pieceImage.classList.add("pieceIcon")
+      pieceImage.setAttribute("draggable",false)
+      piece.append(pieceImage)
 
+      //adding event listeners
+      piece.addEventListener("dragstart",dragStart)
+      piece.addEventListener("dragend",dragEnd)
+      piece.addEventListener("dragover",dragOver)
+
+      gameBoard.append(piece)
+    }
+  })
 }
 
 InitBoard()
-// function createBoard() {
 
-//   startPieces2.forEach((startpiece,i)=>{
-    
-//     //creating  square and adding peices
-//     const square = document.createElement("div")
-//     square.classList.add("square")
-//     square.setAttribute("square-id", i)
+// receives square ID as a string
+function AddPerk(squareClassID){
 
-//     square.append(createPlayer(startpiece))
+piece = document.getElementsByClassName(squareClassID)[0]
 
-//     startPieces2[i] !== ''? square.querySelector('.player').setAttribute("id", i) : {}
+//create perk container and add perks
+perkContainer = document.createElement("div")
+perkContainer.classList.add("perk-container")
+perkContainer.setAttribute("draggable",false)
+
+perk1 = document.createElement("img")
+perk1.classList.add("perk")
+perk1.setAttribute("draggable",false)
+perk1.setAttribute("src", 'src/killstreaks/quick_revive.png')
+perkContainer.append(perk1)
+
+perk2 = document.createElement("img")
+perk2.classList.add("perk")
+perk2.setAttribute("draggable",false)
+perk2.setAttribute("src", 'src/killstreaks/msc_trinity.png')
+perkContainer.append(perk2)
 
 
-//     // coloring square by class
-//     const row = Math.floor((63 - i)/ 8) +1
 
-//     if( row % 2 === 0) {
-//       square.classList.add(i % 2  === 0 ? "white" : "black")
-//     } else {
-//       square.classList.add(i % 2  === 0 ? "black" : "white")
-//     }
+piece.append(perkContainer)
+}
 
-    
-    
-//     gameBoard.append(square)
+AddPerk('F3-R0')
 
-//   })
-// }
-// createBoard()
+
+let startPositionID
+let draggedElement
+let endPositionID
+
+
+/**
+ * @param {DragEvent} e - The drag event object
+ */
+
+function dragStart(e){
+
+  // selection object should be on front, the parent parent (grandfather node) is the square id which is stored
+  startPositionID = e.target.classList[1]
+  console.log(startPositionID)
+  draggedElement = e.target
+  body.style.cursor = 'grabbing'
+}
+
+function dragOver(e) {
+
+  //
+}
+
+function dragEnd(e){
+  // this stops drop from occuring in two squares/ imporant
+  //e.stopPropgation() 
+
+  //returns correct file and rank position as per returnArrayPos() in chess3.js
+  var x = Math.abs(e.clientX - boardImage.getBoundingClientRect().left);
+  var y = Math.abs(e.clientY - boardImage.getBoundingClientRect().top);
+  var file = Math.floor(x*8/(boardImage.clientWidth)).toString()
+  var rank = 7 - Math.floor(y*8/(boardImage.clientHeight)).toString()
+
+  out = 'F' + file + '-R' + rank
+
+  draggedElement.classList.remove(startPositionID)
+  draggedElement.classList.add(out)
+
+  document.body.style.cursor = "default"
+
+  console.log(out)
+  //e.target.append(draggedElement)
+ 
+}

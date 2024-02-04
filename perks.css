@@ -1,0 +1,15 @@
+.perk-container{
+
+  width: var(--square-width);
+  height: var(--square-width);
+  position: absolute;
+
+
+}
+
+.perk {
+
+  width: calc(var(--square-width)/2); 
+  position: relative;
+  
+}

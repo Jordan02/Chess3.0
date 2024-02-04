@@ -1,8 +1,10 @@
 
 :root{
 
---gameboard-width: 400px;
+--gameboard-width: 85vw;
 --square-width: calc(var(--gameboard-width)/8);
+--piece-scaled: calc(var(--square-width) * 0.93);
+--centre-align-offset: calc((var(--square-width) - var(--piece-scaled))/2);
 
 }
 
@@ -16,6 +18,9 @@ body {
 position: relative;
 width: var(--gameboard-width);
 height: var(--gameboard-width);
+/* width: var(--gameboard-width);
+height: var(--gameboard-width); */
+user-select: none;
 
 }
 
