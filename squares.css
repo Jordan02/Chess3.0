@@ -1,0 +1,12 @@
+.square-17 {
+
+     position:absolute;
+     z-index: 1;
+  
+     width: var(--square-width);
+     height: var(--square-width);
+     background-color: black;
+    
+     transform: translate(calc(var(--square-width)*4));
+  
+  }
