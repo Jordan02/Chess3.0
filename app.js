@@ -39,13 +39,17 @@ function returnBoardPos(e) {
   //returns correct file and rank position as per returnArrayPos() in chess3.js
   var x = Math.abs(e.clientX - boardImage.getBoundingClientRect().left);
   var y = Math.abs(e.clientY - boardImage.getBoundingClientRect().top);
-  // var file = Math.floor(x*8/(boardImage.clientWidth))+1
+
+  var file = x*8/(boardImage.clientWidth) + 1
+  var rank = 8 - y*8/(boardImage.clientHeight) + 1
+
+  // var file = Math.floor(x*8/(boardImage.clientWidth)) + 1
   // var rank = 8 - Math.floor(y*8/(boardImage.clientHeight))
 
-  var file = Math.abs(Math.floor(x*8/boardImage.clientWidth) - 7) + 1
-  var rank = Math.floor(y*8/(boardImage.clientHeight)) + 1
+  // var file = Math.abs(Math.floor(x*8/boardImage.clientWidth) - 7) + 1
+  // var rank = Math.floor(y*8/(boardImage.clientHeight)) + 1
 
-  //console.log('F',file,'-R',rank)
+  //console.log('F',file,'-R',rank, boardImage.clientHeight, x,y)
 }
 
 
@@ -141,13 +145,24 @@ function dragEnd(e){
   //e.stopPropgation() 
 
   //returns correct file and rank position as per returnArrayPos() in chess3.js
-  var x = Math.abs(e.clientX - boardImage.getBoundingClientRect().left);
-  var y = Math.abs(e.clientY - boardImage.getBoundingClientRect().top);
+  var x = e.clientX - boardImage.getBoundingClientRect().left;
+  var y = e.clientY - boardImage.getBoundingClientRect().top;
+
+  //check if drop outside of gamebaord
+  a = (x > boardImage.clientWidth)  || (x < 0)  //x-axis
+  b = (y > boardImage.clientHeight) || (y < 0)  //y-axis
+
+  if( a || b ) {
+
+    console.log("out of bounds")
+
+    return 0
+  }
 
   //  -- change board start reference based on wheter black or white is viewing
   if(boardDir == "white") {
 
-    var file = Math.floor(x*8/(boardImage.clientWidth))+ 1
+    var file = Math.floor(x*8/(boardImage.clientWidth)) + 1
     var rank = 8 - Math.floor(y*8/(boardImage.clientHeight))
 
   } else {
@@ -162,8 +177,11 @@ function dragEnd(e){
 
   if (isValid() == true) {
 
+    const capture = tryCapture()
     draggedElement.classList.remove(startPositionID)
     draggedElement.classList.add(endPositionID)
+    
+    if(capture) {console.log("captures")}
     console.log(draggedPeiceType,endPositionID)
 
   } else {
