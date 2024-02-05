@@ -1,9 +1,15 @@
 const gameBoard = document.querySelector("#gameboard")
 const infoDisplay = document.querySelector("#info-display")
-const body = document.getElementsByTagName("body")[0]
+var BoardDirectionStyle = document.querySelector("#boadDirStyle")
 
-document.body.style.cursor = 'src/killstreaks/duckingjam.png'
+// get board veiwing direction
+// note flipping board: will change how peices are rendered, acheived by swapping css style sheets
+// starting square reference is changed (bottom left to top right), ahcieved in dragdrop function
+BoardDirectionStyle.setAttribute("href","squares_white.css")
+BoardDirectionStyle.getAttribute("href") == "squares_black.css"? boardDir = "black" : boardDir = "white"
 
+
+// peice matrix is always from whites perspective. Don't Change
 const startPieces2 = [
 
   'bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR',
@@ -17,6 +23,8 @@ const startPieces2 = [
   
 ]
 
+//console.log(startPieces2.reverse())
+
 // note const variables may need to change if ever we want to change peice svg to another style
 
 const boardImage = document.createElement("img")
@@ -24,19 +32,21 @@ boardImage.setAttribute("src", 'src/chessboards/green_white.png')
 boardImage.classList.add("chessboard")
 gameBoard.append(boardImage)
 
-// //move
-// gameBoard.addEventListener('mousemove', returnBoardPos)
-// function returnBoardPos(e) {
 
-  // //returns correct file and rank position as per returnArrayPos() in chess3.js
-  // var x = Math.abs(e.clientX - boardImage.getBoundingClientRect().left);
-  // var y = Math.abs(e.clientY - boardImage.getBoundingClientRect().top);
-  // var file = Math.floor(x*8/(boardImage.clientWidth))
-  // var rank = 7 - Math.floor(y*8/(boardImage.clientHeight))
+gameBoard.addEventListener('mousemove', returnBoardPos)
+function returnBoardPos(e) {
 
-//   console.log(rank,':',file)
-// }
+  //returns correct file and rank position as per returnArrayPos() in chess3.js
+  var x = Math.abs(e.clientX - boardImage.getBoundingClientRect().left);
+  var y = Math.abs(e.clientY - boardImage.getBoundingClientRect().top);
+  // var file = Math.floor(x*8/(boardImage.clientWidth))+1
+  // var rank = 8 - Math.floor(y*8/(boardImage.clientHeight))
 
+  var file = Math.abs(Math.floor(x*8/boardImage.clientWidth) - 7) + 1
+  var rank = Math.floor(y*8/(boardImage.clientHeight)) + 1
+
+  //console.log('F',file,'-R',rank)
+}
 
 
 function InitBoard(){
@@ -95,18 +105,18 @@ perk2.setAttribute("draggable",false)
 perk2.setAttribute("src", 'src/killstreaks/msc_trinity.png')
 perkContainer.append(perk2)
 
-
-
 piece.append(perkContainer)
+
 }
 
-AddPerk('F3-R0')
+
+AddPerk('F6-R1')
 
 
 let startPositionID
 let draggedElement
 let endPositionID
-
+let draggedPeiceType
 
 /**
  * @param {DragEvent} e - The drag event object
@@ -116,14 +126,14 @@ function dragStart(e){
 
   // selection object should be on front, the parent parent (grandfather node) is the square id which is stored
   startPositionID = e.target.classList[1]
-  console.log(startPositionID)
+  draggedPeiceType = e.target.classList[0]
+  console.log(draggedPeiceType,startPositionID)
   draggedElement = e.target
-  body.style.cursor = 'grabbing'
+ 
 }
 
 function dragOver(e) {
 
-  //
 }
 
 function dragEnd(e){
@@ -133,17 +143,38 @@ function dragEnd(e){
   //returns correct file and rank position as per returnArrayPos() in chess3.js
   var x = Math.abs(e.clientX - boardImage.getBoundingClientRect().left);
   var y = Math.abs(e.clientY - boardImage.getBoundingClientRect().top);
-  var file = Math.floor(x*8/(boardImage.clientWidth)).toString()
-  var rank = 7 - Math.floor(y*8/(boardImage.clientHeight)).toString()
 
-  out = 'F' + file + '-R' + rank
+  //  -- change board start reference based on wheter black or white is viewing
+  if(boardDir == "white") {
 
-  draggedElement.classList.remove(startPositionID)
-  draggedElement.classList.add(out)
+    var file = Math.floor(x*8/(boardImage.clientWidth))+ 1
+    var rank = 8 - Math.floor(y*8/(boardImage.clientHeight))
 
-  document.body.style.cursor = "default"
+  } else {
 
-  console.log(out)
+    var file = Math.abs(Math.floor(x*8/boardImage.clientWidth) - 7) + 1
+    var rank = Math.floor(y*8/(boardImage.clientHeight)) + 1
+  }
+  
+  // -- checks and validations before confirming class/position change
+
+  endPositionID = 'F' + file.toString() + '-R' + rank.toString()
+
+  if (isValid() == true) {
+
+    draggedElement.classList.remove(startPositionID)
+    draggedElement.classList.add(endPositionID)
+    console.log(draggedPeiceType,endPositionID)
+
+  } else {
+
+    console.log(draggedPeiceType,endPositionID)
+    console.log("illegal move")
+  }
+  
+
+  
   //e.target.append(draggedElement)
  
 }
+
