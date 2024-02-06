@@ -28,7 +28,7 @@ const startPieces2 = [
 // note const variables may need to change if ever we want to change peice svg to another style
 
 const boardImage = document.createElement("img")
-boardImage.setAttribute("src", 'src/chessboards/green_white.png')
+boardImage.setAttribute("src", 'src/chessboards/lilac_cream_marble.png')
 boardImage.classList.add("chessboard")
 gameBoard.append(boardImage)
 
@@ -100,7 +100,7 @@ perkContainer.setAttribute("draggable",false)
 perk1 = document.createElement("img")
 perk1.classList.add("perk")
 perk1.setAttribute("draggable",false)
-perk1.setAttribute("src", 'src/killstreaks/quick_revive.png')
+perk1.setAttribute("src", 'src/killstreaks/duckingjam.png')
 perkContainer.append(perk1)
 
 perk2 = document.createElement("img")

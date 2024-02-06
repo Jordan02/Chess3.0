@@ -3,13 +3,14 @@
   width: var(--square-width);
   height: var(--square-width);
   position: absolute;
+  /* margin-top: calc(var(--square-width)*-1/3); */
 
 
 }
 
 .perk {
 
-  width: calc(var(--square-width)/2); 
+  width: calc(var(--square-width)/3); 
   position: relative;
   
 }
