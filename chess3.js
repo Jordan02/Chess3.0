@@ -1,12 +1,20 @@
 
 // returns file and row(rank) index of single array of board
+// todo: probably need to add out of bound error catches here?
+
 function returnArrayPos(pos){
 
   const row = 7 - Math.floor((pos/8)) + 1
   const file = pos - Math.floor((pos/8))*8 + 1
   return [file,row]
 
-  // todo: probably need to add out of bound error catches here?
+}
+
+function returnSingleArrayPos(file,row)
+{
+  F = file - 1
+  R = row - 1
+  return (F + (7-R)*8)
 
 }
 
@@ -24,12 +32,6 @@ function returnClassPos(file, rank){
 // -- this uses varibles defined within dragging event functions
 function isValid() {
 
-  const pos1_f = returnPiecePos(startPositionID)[0]
-  const pos1_r = returnPiecePos(startPositionID)[1]
-
-  const pos2_f = returnPiecePos(endPositionID)[0]
-  const pos2_r = returnPiecePos(endPositionID)[1]
-
   // check if end position has a piece 
   const isOccupied = gameBoard.getElementsByClassName(endPositionID)[0]
 
@@ -44,7 +46,7 @@ function isValid() {
 
   // TODO need to add enpassent and castling to finish this
   // TODO need to add isKinginCheck conditions
-  switch(draggedPeiceType){
+  switch(draggedPieceType){
 
     case 'wP' :
       
@@ -53,7 +55,7 @@ function isValid() {
         
         if(pos2_r - pos1_r > 1) {return 0}                          // only allow 1 step forard
         if(isOccupied !== undefined && pos2_f == pos1_f) {return 0} // prevent moving forward into peice
-        if(pos2_f !== pos1_f && isOccupied == undefined) {return 0} // diagonal capture rule
+        if(pos2_f !== pos1_f && isOccupied == undefined || pos2_r == pos1_r) {return 0} // diagonal capture rule
 
       } 
 
@@ -79,7 +81,7 @@ function isValid() {
         
         if(pos1_r - pos2_r > 1) {return 0}                          // only allow 1 step forard
         if(isOccupied !== undefined && pos2_f == pos1_f) {return 0} // prevent moving forward into peice
-        if(pos2_f !== pos1_f && isOccupied == undefined) {return 0} // diagonal capture rule
+        if(pos2_f !== pos1_f && isOccupied == undefined || pos2_r == pos1_r) {return 0} // diagonal capture rule
       } 
 
       // first move exception for 2 steps
@@ -91,8 +93,8 @@ function isValid() {
         if(pos2_f !== pos1_f && isOccupied == undefined) {return 0} // diagonal capture rule
       }
 
-      //no moving backwards
-      if(pos2_r > pos1_r) {return 0}  
+      if(pos2_r > pos1_r) {return 0}  //no moving backwards
+      
 
       break
 
@@ -220,3 +222,15 @@ function tryCapture(){
   }
 
 }
+
+
+
+function updateTempArray() {
+
+  startPosArrayValue = returnSingleArrayPos(pos1_f,pos1_r)
+  endPosArrayValue = returnSingleArrayPos(pos2_f,pos2_r)
+  tempGameArray[startPosArrayValue] = ''
+  tempGameArray[endPosArrayValue] = draggedPieceType
+
+}
+

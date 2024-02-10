@@ -8,30 +8,53 @@ var BoardDirectionStyle = document.querySelector("#boadDirStyle")
 BoardDirectionStyle.setAttribute("href","squares_white.css")
 BoardDirectionStyle.getAttribute("href") == "squares_black.css"? boardDir = "black" : boardDir = "white"
 
+let startPositionID
+let endPositionID
+let draggedElement
+let draggedPieceType   // type of peice being dragged
+let droppedPieceType   // type of piece dragged piece is dropped into
+
+let gameArray          // it's more effience to update a game array, then parse this, than to getelementbyclassname
+let tempGameArray      // this array is updated for validation purposes become being committed
+
+let pos1_f
+let pos1_r
+let pos2_f
+let pos2_r
 
 // peice matrix is always from whites perspective. Don't Change
+// const startPieces2 = [
+
+//   'bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR',
+//   'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP',
+//   '', '', '', '', '', '', '', '',
+//   '', '', '', '', '', '', '', '',
+//   '', '', '', '', '', '', '', '',
+//   '', '', '', '', '', '', '', '',
+//   'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP',
+//   'wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR'
+  
+// ]
+
 const startPieces2 = [
 
-  'bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR',
-  'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP',
+  'bQ', 'bR', '', '', '', '', '', '',
   '', '', '', '', '', '', '', '',
   '', '', '', '', '', '', '', '',
   '', '', '', '', '', '', '', '',
   '', '', '', '', '', '', '', '',
-  'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP',
-  'wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR'
+  '', '', '', '', '', '', '', '',
+  '', '', '', '', '', '', '', '',
+  '', '', '', '', '', '', 'wB', 'wQ'
   
 ]
-
-//console.log(startPieces2.reverse())
 
 // note const variables may need to change if ever we want to change peice svg to another style
 
 const boardImage = document.createElement("img")
-boardImage.setAttribute("src", 'src/chessboards/lilac_cream_marble.png')
+boardImage.setAttribute("src", 'src/chessboards/resin_ocean.png')
 boardImage.classList.add("chessboard")
 gameBoard.append(boardImage)
-
 
 gameBoard.addEventListener('mousemove', returnBoardPos)
 function returnBoardPos(e) {
@@ -49,9 +72,8 @@ function returnBoardPos(e) {
   // var file = Math.abs(Math.floor(x*8/boardImage.clientWidth) - 7) + 1
   // var rank = Math.floor(y*8/(boardImage.clientHeight)) + 1
 
-  //console.log('F',file,'-R',rank, boardImage.clientHeight, x,y)
+  //console.log('F',file,'-R',rank)
 }
-
 
 function InitBoard(){
   startPieces2.forEach((startpiece, i) => {
@@ -83,6 +105,11 @@ function InitBoard(){
       gameBoard.append(piece)
     }
   })
+
+  tempGameArray = startPieces2
+  gameArray = startPieces2
+  //AddPerk('F6-R1')
+  //AddPerk('F2-R8')
 }
 
 InitBoard()
@@ -113,15 +140,6 @@ piece.append(perkContainer)
 
 }
 
-
-AddPerk('F6-R1')
-
-
-let startPositionID
-let draggedElement
-let endPositionID
-let draggedPeiceType
-
 /**
  * @param {DragEvent} e - The drag event object
  */
@@ -130,9 +148,11 @@ function dragStart(e){
 
   // selection object should be on front, the parent parent (grandfather node) is the square id which is stored
   startPositionID = e.target.classList[1]
-  draggedPeiceType = e.target.classList[0]
-  console.log(draggedPeiceType,startPositionID)
+  draggedPieceType = e.target.classList[0]
+  console.log(draggedPieceType,startPositionID)
   draggedElement = e.target
+  pos1_f = returnPiecePos(startPositionID)[0]    // update numerical start position
+  pos1_r = returnPiecePos(startPositionID)[1]
  
 }
 
@@ -174,6 +194,12 @@ function dragEnd(e){
   // -- checks and validations before confirming class/position change
 
   endPositionID = 'F' + file.toString() + '-R' + rank.toString()
+  pos2_f = file
+  pos2_r = rank
+
+  droppedPieceType = gameArray[returnSingleArrayPos(pos2_f, pos2_r)]
+
+  updateTempArray() // update gameboardaarry for validation checks before comitting
 
   if (isValid() == true) {
 
@@ -181,18 +207,30 @@ function dragEnd(e){
     draggedElement.classList.remove(startPositionID)
     draggedElement.classList.add(endPositionID)
     
+    gameArray = [...tempGameArray]  //Update real game array. (...) is needed to prevent reference copy
     if(capture) {console.log("captures")}
-    console.log(draggedPeiceType,endPositionID)
+    console.log(draggedPieceType,endPositionID)
 
   } else {
 
-    console.log(draggedPeiceType,endPositionID)
+    
+    tempGameArray = [...gameArray] // reset tempGameArray                      ///start here, WHY IS THE TEMP AND GAME ARRAY NOT UPDATING PROPERLY, Got it working, not work on using arrays for gameboard logic, and storing possible moves
+    console.log(draggedPieceType,endPositionID)
     console.log("illegal move")
   }
   
-
-  
-  //e.target.append(draggedElement)
- 
 }
+
+function test() {
+
+a = ['wp','rt','t3']
+
+
+console.log(a)
+console.log(a[0])
+console.log(a[0][0])
+
+}
+
+test()
 
