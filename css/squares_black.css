@@ -5,7 +5,8 @@ piece {
 
    width: var(--square-width);
    height: var(--square-width);
-   background-color: red;
+   z-index: 1;
+   /* background-color: red; */
 }
 
 .pieceIcon{

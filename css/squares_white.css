@@ -6,6 +6,7 @@ piece {
    width: var(--square-width);
    height: var(--square-width);
    background-color: transparent;
+   z-index: 1;
 }
 
 .pieceIcon{

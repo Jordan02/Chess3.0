@@ -5,7 +5,7 @@ var BoardDirectionStyle = document.querySelector("#boadDirStyle")
 // get board veiwing direction
 // note flipping board: will change how peices are rendered, acheived by swapping css style sheets
 // starting square reference is changed (bottom left to top right), ahcieved in dragdrop function
-BoardDirectionStyle.setAttribute("href","squares_white.css")
+BoardDirectionStyle.setAttribute("href","css/squares_white.css")
 BoardDirectionStyle.getAttribute("href") == "squares_black.css"? boardDir = "black" : boardDir = "white"
 
 let startPositionID
@@ -17,10 +17,10 @@ let droppedPieceType   // type of piece dragged piece is dropped into
 let gameArray          // it's more effience to update a game array, then parse this, than to getelementbyclassname
 let tempGameArray      // this array is updated for validation purposes become being committed
 
-let pos1_f
-let pos1_r
-let pos2_f
-let pos2_r
+let F1
+let R1
+let F2
+let R2
 
 // peice matrix is always from whites perspective. Don't Change
 // const startPieces2 = [
@@ -151,8 +151,8 @@ function dragStart(e){
   draggedPieceType = e.target.classList[0]
   console.log(draggedPieceType,startPositionID)
   draggedElement = e.target
-  pos1_f = returnPiecePos(startPositionID)[0]    // update numerical start position
-  pos1_r = returnPiecePos(startPositionID)[1]
+  F1 = returnPiecePos(startPositionID)[0]    // update numerical start position
+  R1 = returnPiecePos(startPositionID)[1]
  
 }
 
@@ -194,10 +194,10 @@ function dragEnd(e){
   // -- checks and validations before confirming class/position change
 
   endPositionID = 'F' + file.toString() + '-R' + rank.toString()
-  pos2_f = file
-  pos2_r = rank
+  F2 = file
+  R2 = rank
 
-  droppedPieceType = gameArray[returnSingleArrayPos(pos2_f, pos2_r)]
+  droppedPieceType = gameArray[returnSingleArrayPos(F2, R2)]
 
   updateTempArray() // update gameboardaarry for validation checks before comitting
 
@@ -232,5 +232,4 @@ console.log(a[0][0])
 
 }
 
-test()
 

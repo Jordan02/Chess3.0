@@ -51,25 +51,25 @@ function isValid() {
     case 'wP' :
       
       //1 step forward rule
-      if(pos1_r !== 2) {
+      if(R1 !== 2) {
         
-        if(pos2_r - pos1_r > 1) {return 0}                          // only allow 1 step forard
-        if(isOccupied !== undefined && pos2_f == pos1_f) {return 0} // prevent moving forward into peice
-        if(pos2_f !== pos1_f && isOccupied == undefined || pos2_r == pos1_r) {return 0} // diagonal capture rule
+        if(R2 - R1 > 1) {return 0}                          // only allow 1 step forard
+        if(isOccupied !== undefined && F2 == F1) {return 0} // prevent moving forward into peice
+        if(F2 !== F1 && isOccupied == undefined || R2 == R1) {return 0} // diagonal capture rule
 
       } 
 
       // first move exception for 2 steps
       else {
         
-        if(pos2_r-pos1_r>2)   {return 0}                            // allow two step
-        if(isOccupied !== undefined && pos2_f == pos1_f) {return 0} // prevent moving forward into peice
-        if((pos2_f !== pos1_f) && (pos2_r-pos1_r == 2)) {return 0}  // prevent diagonal moves when stepping twice
-        if(pos2_f !== pos1_f && isOccupied == undefined) {return 0} // diagonal capture rule
+        if(R2-R1>2)   {return 0}                            // allow two step
+        if(isOccupied !== undefined && F2 == F1) {return 0} // prevent moving forward into peice
+        if((F2 !== F1) && (R2-R1 == 2)) {return 0}  // prevent diagonal moves when stepping twice
+        if(F2 !== F1 && isOccupied == undefined) {return 0} // diagonal capture rule
       }
 
       //no moving backwards
-      if(pos2_r < pos1_r) {return 0}
+      if(R2 < R1) {return 0}
       
 
       break
@@ -77,23 +77,23 @@ function isValid() {
     case 'bP' :
       // same as white, but  reverses
       //1 step forward rule
-      if(pos1_r !== 7) {
+      if(R1 !== 7) {
         
-        if(pos1_r - pos2_r > 1) {return 0}                          // only allow 1 step forard
-        if(isOccupied !== undefined && pos2_f == pos1_f) {return 0} // prevent moving forward into peice
-        if(pos2_f !== pos1_f && isOccupied == undefined || pos2_r == pos1_r) {return 0} // diagonal capture rule
+        if(R1 - R2 > 1) {return 0}                          // only allow 1 step forard
+        if(isOccupied !== undefined && F2 == F1) {return 0} // prevent moving forward into peice
+        if(F2 !== F1 && isOccupied == undefined || R2 == R1) {return 0} // diagonal capture rule
       } 
 
       // first move exception for 2 steps
       else {
         
-        if(pos1_r-pos2_r>2)   {return 0}                            // allow two step
-        if(isOccupied !== undefined && pos2_f == pos1_f) {return 0} // prevent moving forward into peice
-        if((pos2_f !== pos1_f) && (pos2_r-pos1_r == 2)) {return 0}  // prevent diagonal moves when stepping twice
-        if(pos2_f !== pos1_f && isOccupied == undefined) {return 0} // diagonal capture rule
+        if(R1-R2>2)   {return 0}                            // allow two step
+        if(isOccupied !== undefined && F2 == F1) {return 0} // prevent moving forward into peice
+        if((F2 !== F1) && (R2-R1 == 2)) {return 0}  // prevent diagonal moves when stepping twice
+        if(F2 !== F1 && isOccupied == undefined) {return 0} // diagonal capture rule
       }
 
-      if(pos2_r > pos1_r) {return 0}  //no moving backwards
+      if(R2 > R1) {return 0}  //no moving backwards
       
 
       break
@@ -101,40 +101,40 @@ function isValid() {
     case 'wN' :
     case 'bN' :
       
-      var a = Math.abs(pos2_r - pos1_r) == 1 && Math.abs(pos2_f - pos1_f) == 2
-      var b = Math.abs(pos2_r - pos1_r) == 2 && Math.abs(pos2_f - pos1_f) == 1
+      var a = Math.abs(R2 - R1) == 1 && Math.abs(F2 - F1) == 2
+      var b = Math.abs(R2 - R1) == 2 && Math.abs(F2 - F1) == 1
       if ( !(a || b)) { return 0 }
       break
 
     case'wB' :
     case'bB' :
 
-      if ( Math.abs((pos2_r - pos1_r)/(pos2_f - pos1_f)) !== 1) {return 0}   // checking for diagonal move, uisng dx/dy == 1
-      if(testCollision(pos1_f,pos1_r,pos2_f,pos2_r)) {return 0}              // test collision
+      if ( Math.abs((R2 - R1)/(F2 - F1)) !== 1) {return 0}   // checking for diagonal move, uisng dx/dy == 1
+      if(testCollision(F1,R1,F2,R2)) {return 0}              // test collision
       break
 
     case 'wR':
     case 'bR' :
       
-      if (!(pos2_f == pos1_f || pos2_r == pos1_r)) {return 0}    // checking if movement is not veritcal or horizontal
-      if(testCollision(pos1_f,pos1_r,pos2_f,pos2_r)) {return 0}  // checking if collision has occured
+      if (!(F2 == F1 || R2 == R1)) {return 0}    // checking if movement is not veritcal or horizontal
+      if(testCollision(F1,R1,F2,R2)) {return 0}  // checking if collision has occured
       break
 
     case 'wQ':
     case 'bQ':
       
-      var a = !(pos2_f == pos1_f || pos2_r == pos1_r)              // horizontal, vertical check
-      var b = Math.abs((pos2_r - pos1_r)/(pos2_f - pos1_f)) !== 1  // diagonal check
+      var a = !(F2 == F1 || R2 == R1)              // horizontal, vertical check
+      var b = Math.abs((R2 - R1)/(F2 - F1)) !== 1  // diagonal check
       if ( a && b) {return 0}                                      // combine both
   
-      if(testCollision(pos1_f,pos1_r,pos2_f,pos2_r)) {return 0}    // test collision
+      if(testCollision(F1,R1,F2,R2)) {return 0}    // test collision
       break
 
     case 'wK':
     case 'bK':  
       
-      var a = Math.abs(pos2_r - pos1_r) > 1  // vertical 1 step check
-      var b = Math.abs(pos2_f - pos1_f) > 1  // vertical 1 step check
+      var a = Math.abs(R2 - R1) > 1  // vertical 1 step check
+      var b = Math.abs(F2 - F1) > 1  // vertical 1 step check
       if(a || b) {return 0}
 
       break
@@ -227,8 +227,8 @@ function tryCapture(){
 
 function updateTempArray() {
 
-  startPosArrayValue = returnSingleArrayPos(pos1_f,pos1_r)
-  endPosArrayValue = returnSingleArrayPos(pos2_f,pos2_r)
+  startPosArrayValue = returnSingleArrayPos(F1,R1)
+  endPosArrayValue = returnSingleArrayPos(F2,R2)
   tempGameArray[startPosArrayValue] = ''
   tempGameArray[endPosArrayValue] = draggedPieceType
 
