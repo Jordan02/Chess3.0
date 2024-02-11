@@ -1,7 +1,7 @@
 
 :root{
 
-  --gameboard-width: 50vh;
+  --gameboard-width: 33vh;
   --square-width: calc(var(--gameboard-width)/8);
   --piece-scaled: calc(var(--square-width) * 0.93);
   --centre-align-offset: calc((var(--square-width) - var(--piece-scaled))/2);
@@ -15,7 +15,8 @@
     height: var(--gameboard-width);
     user-select: none;
     z-index: 0;
-    padding: 20px
+    padding: 25px;
+    
   
   }
   
@@ -25,6 +26,7 @@
     position: absolute;
     width: inherit;
     height: inherit;
+    box-shadow: 5px 5px 10px black;
     /* border-radius: 4%; */
   
   }

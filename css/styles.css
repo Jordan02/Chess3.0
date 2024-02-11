@@ -2,3 +2,10 @@ body {
   
   background-color: darkslategray;
 }
+
+#container2 {
+
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
