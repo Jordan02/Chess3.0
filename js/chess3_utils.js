@@ -25,7 +25,13 @@ export function returnPiecePos(pieceClassID){
 
 //  --- creates text id from number index
 export function returnClassPos(file, rank){
-  return "F" + file.toString() + "-R" + rank.toString()
+
+  var F
+  var R
+  file > 8 ? F = 8 : F = file
+  rank > 8 ? R = 8 : R = rank
+
+  return "F" + F.toString() + "-R" + R.toString()
 }
 
 // --- returns boolean value if move from pos 1-2 is valid ****

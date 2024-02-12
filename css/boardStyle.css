@@ -1,7 +1,7 @@
 
 :root{
 
-  --gameboard-width: 33vh;
+  --gameboard-width: 50vh;
   --square-width: calc(var(--gameboard-width)/8);
   --piece-scaled: calc(var(--square-width) * 0.93);
   --centre-align-offset: calc((var(--square-width) - var(--piece-scaled))/2);
@@ -15,7 +15,7 @@
     height: var(--gameboard-width);
     user-select: none;
     z-index: 0;
-    padding: 25px;
+    padding: 40px;
     
   
   }
@@ -29,4 +29,30 @@
     box-shadow: 5px 5px 10px black;
     /* border-radius: 4%; */
   
+  }
+
+  #move-to {
+
+    position: absolute;
+    width: var(--square-width);
+    height: var(--square-width);
+    border: solid rgba(255, 255, 0, 1) 0.3em; 
+    box-shadow: 0 0 0.7em rgb(255, 255, 0);
+    
+    box-sizing: border-box; 
+    z-index: 10;
+
+  }
+
+  #move-from {
+
+    position: absolute;
+    width: var(--square-width);
+    height: var(--square-width);
+    
+    background-color: rgba(255, 255, 0, 0.4);
+  
+    box-sizing: border-box; 
+    z-index: 10;
+
   }
