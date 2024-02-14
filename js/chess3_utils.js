@@ -65,7 +65,6 @@ export function isBound(file, rank) {
 }
 
 
-
 /**
  * Checks whether a move is valid or not 
  * @param {number} F1 - Starting file number
@@ -396,6 +395,60 @@ export function boundDrag(e, board_img, offsetX_percent, offsetY_percent){
   return[x,y]
 }
 
+/**
+ * returns cursor position for piece, bound to the gameboard image 
+ * @param {event} e - event object
+ * @param {HTMLImageElement} board_img - Starting rank number
+ * @param {string} boardViewDir - board view direction, ('white' or 'black')
+ * @param {HTMLDivElement} gameBoard - gameboard
+ * @param {HTMLDivElement} MoveToSquare - square element used as a highlight
+ */
+export function movingSquareHighlight(e,board_img, boardViewDir, gameBoard,MoveToSquare){
+
+  if(!getBoardXY(e,board_img)[2]) {
+
+    const moveToPos = getBoardFR(e,board_img,boardViewDir)        // get file rank location
+    const MoveToClass = PosToClass(moveToPos[0],moveToPos[1])          // create dragover class
+    MoveToSquare.className = ""                                        // remove all classes
+    MoveToSquare.classList.add(MoveToClass)                            // update highlight square
+    gameBoard.append(MoveToSquare)                                     // append object
+                                
+  } else {
+
+    MoveToSquare.remove()
+  }
+}
+
+/**
+ * changes the game move from black to white, or white to black
+ * @param {string} playerGo - the current player go, either 'white' or 'black
+ * @return {string} returns the next players go color
+ */
+export function changePlayerGo(playerGo){
+
+  playerGo == 'white' ? playerGo = 'black' : playerGo = 'white'
+  return playerGo
+
+}
+
+/**
+ * attemepts to capture a piece if possible
+ * @param {string} draggedPieceType - 
+ * @param {string} droppedPieceType - 
+ * @param {string} endPositionID - 
+ * @param {HTMLDivElement} gameBoard - 
+ */
+export function tryCapture(draggedPieceType,droppedPieceType,endPositionID,gameBoard){
+
+  if(draggedPieceType[0] !== droppedPieceType[0] && droppedPieceType !== '' ) {
+
+    const targetPiece = gameBoard.querySelector('.' + endPositionID)
+    targetPiece.remove()
+    return 1
+  }
+
+  return 0
+}
 
 
 export class chess_controller {
@@ -404,6 +457,8 @@ export class chess_controller {
   
   constructor(){
 
+    // TODO: add another set of new listener function to handle movement by clicking
+    // TODO: add another event listner to pass function back to board,
     document.addEventListener("passValue",this._recieveChessboard.bind(this))
     document.addEventListener("pointerdown",this._start.bind(this))
     document.addEventListener("pointermove",this._move.bind(this))
@@ -412,6 +467,7 @@ export class chess_controller {
 
     //gameboard variables
     this.boardID = undefined  // Board ID, String
+    this.selectedBoardID      // selected board ID
     this.gameBoard            // container for gameboard, </div> object
     this.boardImage           // container for board image, </img> object
     this.boardImageURl        // Location to board png, string
@@ -422,6 +478,11 @@ export class chess_controller {
     
     //controller variables
     this.dragging
+    this.peicePickup
+    this.singleClick
+    this.dropped
+    this.clickCount2 = 0
+
     this.startPositionID    // MoveFrom square [F]ileX-[R]owX sytax, string
     this.endPositionID      // MoveTo square [F]ileX-[R]owX sytax, string
     this.draggedElement     // Piece element being moved, </piece> or </div> object
@@ -432,7 +493,7 @@ export class chess_controller {
     this.R1                 // MoveFrom Square rank, int 
     this.F2                 // MoveTo Square file, int
     this.R2                 // MoveTo Square file, int
-    this.peicePickup 
+     
 
     //visual variables
 
@@ -441,12 +502,21 @@ export class chess_controller {
 
     this.MoveToSquare = document.createElement("div")
     this.MoveToSquare.setAttribute("id","move-to")
-    
+
+    this.MoveToSquareOnClick = document.createElement("div")
+    this.MoveToSquareOnClick.setAttribute("id","move-to-on-click")
   }
 
+  _UpdateChessboard(){
+
+    const event = new CustomEvent('UpdateChessBoard', {detail: this})
+    document.dispatchEvent(event)
+    //console.log("emitted")
+  }
 
   _recieveChessboard(e){
 
+    // if selected board is a new board, intialise controller with it's variables
     if(e.detail.boardID !== this.boardID) {
 
       this.boardID = e.detail.boardID;
@@ -456,121 +526,194 @@ export class chess_controller {
       this.pieceFolderURL = e.detail.pieceFolderURL;
       this.boardViewDir = e.detail.boardViewDir;
       this.playerGo = e.detail.playerGo;
-      this.gameArray = e.detail.gameArray;
-    }
-
+      this.gameArray = [...e.detail.gameArray];
+      this.tempGameArray = [...e.detail.gameArray];
+    } 
+    
   }
 
   _start(e){
 
-    console.log("_start")
-    this.dragging = true
-
-    if(this.boardID == undefined) return;         // ABORT upon start, if no boardID has been clicked on
-    if(getBoardXY(e,this.boardImage)[2]) return;  // ABORT if cursor is out of bounds
+    // -- ABORTS --
+    {
+      if(this.boardID == undefined) return;          // ABORT upon start, if no boardID has been clicked on
+      if(getBoardXY(e,this.boardImage)[2]) return;   // ABORT if cursor is out of bounds
+    }
     
-    // -- UPDATING VARIABLES --
-    this.MoveFromSquare.classList.remove(this.startPositionID)
-    this.F1 = getBoardFR(e,this.boardImage,this.boardViewDir)[0]
-    this.R1 = getBoardFR(e,this.boardImage,this.boardViewDir)[1]
-    this.startPositionID = PosToClass(this.F1,this.R1)
-    this.draggedElement = this.gameBoard.querySelector("." + this.startPositionID)
-    this.draggedPieceType = this.gameArray[PosToIndex(this.F1,this.R1)]
-    this.draggedElement == undefined ? this.peicePickup = false : this.peicePickup = true
-
+    // -- UPDATING VARIABLES -- 
+    {
+      this.dragging = true
+      this.MoveFromSquare.classList.remove(this.startPositionID)
+      this.F1 = getBoardFR(e,this.boardImage,this.boardViewDir)[0]
+      this.R1 = getBoardFR(e,this.boardImage,this.boardViewDir)[1]
+      this.startPositionID = PosToClass(this.F1,this.R1)
+      this.draggedElement = this.gameBoard.querySelector("." + this.startPositionID)
+      this.draggedPieceType = this.gameArray[PosToIndex(this.F1,this.R1)]
+      this.draggedElement == undefined ? this.peicePickup = false : this.peicePickup = true
+    }
+    
     // -- WHEN A PIECE HAS BEEN SELECTED
-    if(!this.peicePickup) return;   // ABORT if no peice is selected
+    {
+      if(!this.peicePickup) return;                                 // ABORT if no peice is selected
+      if(this.draggedPieceType[0] !== this.playerGo[0]) { console.log(`${this.boardID}: ${this.playerGo}s-move`); return; }    // ABORT if piece color is wrong go
 
-    console.log(this.startPositionID)
+      this.MoveFromSquare.className = ""
+      this.MoveFromSquare.classList.add(this.startPositionID)
+      this.gameBoard.append(this.MoveFromSquare)
+      console.log(`${this.boardID}: ${this.startPositionID}`)
 
-    // add highlight square
-    this.MoveFromSquare.className = ""
-    this.MoveFromSquare.classList.add(this.startPositionID)
-    this.gameBoard.append(this.MoveFromSquare)
-
+    }
+    
   }
 
   _move(e){
 
-    if(this.boardID == undefined) return;           // ABORT upon start, if no boardID has been clicked on
-    if(!this.dragging) return;                      // ABORT when _end is run, and turn dragging off
-    if(this.draggedElement ==  undefined) return;   // ABORT if piece not selected, ABORT
-    
-  
-    // -- HIGHLIGHTING MOVE TO SQUARE, (if cursor is bound to board)
-    if(!getBoardXY(e,this.boardImage)[2]) {
-
-      const moveToPos = getBoardFR(e,this.boardImage,this.boardViewDir)        // get file rank location
-      const MoveToClass = PosToClass(moveToPos[0],moveToPos[1])                // create dragover class
-      this.MoveToSquare.className = ""                                         // remove all classes
-      this.MoveToSquare.classList.add(MoveToClass)                             // update highlight square
-      this.gameBoard.append(this.MoveToSquare)                                 // append object
-
-    } else {
-
-      this.MoveToSquare.remove()
+    // -- ABORTS --
+    {
+      if(this.boardID == undefined) return;                          // ABORT upon start, if no boardID has been clicked on
+      if(!this.dragging) return;                                     // ABORT when _end is run, and turn dragging off
+      if(this.draggedPieceType[0] !== this.playerGo[0])  return;     // ABORT if piece color is wrong go
+      //if(this.draggedElement ==  undefined) return;                // ABORT if piece not selected, ABORT
+      
     }
-
-    // -- DRAGGING PIECE VISUAL UPDATE
-    this.draggedElement.style.zIndex = 100                       // put piece in front
-    this.draggedElement.classList.remove(this.startPositionID)   // temp removal of square class
-    const dragCoord = boundDrag(e,this.boardImage,12,0)          // get bound coordinates 
-    this.draggedElement.style.left = dragCoord[0]
-    this.draggedElement.style.top = dragCoord[1]
-    
    
-    //console.log(getAbsBoardFR(e,this.boardImage,this.boardViewDir))
+    // -- MOVEMENT OPERATIONS
+    {
+
+      // -- WHEN DRAGGING WITH PIECE TO MOVE
+        if(this.peicePickup) {
+
+            // -- HIGHLIGHTING MOVE TO SQUARE, (if cursor is bound to board)
+          movingSquareHighlight(e,this.boardImage,this.boardViewDir,this.gameBoard,this.MoveToSquare)
+
+          // -- DRAGGING PIECE VISUAL UPDATE
+          this.draggedElement.style.zIndex = 100                       // put piece in front
+          this.draggedElement.classList.remove(this.startPositionID)   // temp removal of square class
+          const dragCoord = boundDrag(e,this.boardImage,12,0)          // get bound coordinates 
+          this.draggedElement.style.left = dragCoord[0]
+          this.draggedElement.style.top = dragCoord[1]
+
+        } 
+
     
+    } 
+
   }
 
   _end(e) {
     
-    console.log("_end")
-    if(!this.peicePickup) return;   // ABORT if no peice is selected
-
-    // -- RESETTING VISUALS (HIGHLIGHTING SQUARES)
-    this.MoveFromSquare.remove()
-    this.MoveToSquare.remove()
-    
-    if(this.draggedElement !== undefined) {
-
-      this.draggedElement.style = null
-      this.draggedElement.style.zIndex = null 
+    // -- ABORTS 
+    {
+      if(!this.peicePickup) return;                                  // ABORT if no peice is selected
+      if(this.draggedPieceType[0] !== this.playerGo[0])  return;     // ABORT if piece color is wrong go
     }
-
-    // -- UPDATING PIECE POSISTION MOVE IS BOUND TO BOARD
-
-    if(!getBoardXY(e,this.boardImage)[2]) {
-
+   
+    // -- GETTING DROP SQUARE DATA
+    {
+       // GETTING DROP SQUARE POS
       const draggedCoord = getBoardFR(e,this.boardImage,this.boardViewDir)
       this.F2 = draggedCoord[0]
       this.R2 = draggedCoord[1]
       this.endPositionID = PosToClass(this.F2,this.R2)
-      console.log(this.endPositionID)
-      this.draggedElement.classList.add(this.endPositionID) 
+      this.droppedPieceType = this.gameArray[PosToIndex(this.F2,this.R2)]
+      
+      // UPDATING GAME ARRAYS
+      this.tempGameArray[PosToIndex(this.F1,this.R1)] = ''
+      this.tempGameArray[PosToIndex(this.F2,this.R2)] = this.draggedPieceType
+      
+      // PERFORMING MOVE CHECKS
+      var isOutOfBounds = getBoardXY(e,this.boardImage)[2]
 
-    } else {
+    }
 
-      console.log("Off-Board")
-      this.draggedElement.classList.add(this.startPositionID) 
+    /// --- WHERE MOVES ARE COMMITTED OR NOT
+    {
+      
+      if(!isOutOfBounds) {
+        // vvvv -- IF DROPS ARE WITHIN BOARD -- vvvv
+        
+        var checkValid = isValid(this.F1,this.R1, this.F2, this.R2, this.tempGameArray, this.gameArray)
+
+        if(checkValid) {
+          // vvvv -- IF DROPS ARE VALID -- vvvv
+
+          // try capture (do first before updating visual board)
+          var capture = tryCapture(this.draggedPieceType,
+            this.droppedPieceType,this.endPositionID,this.gameBoard)  
+          capture ? capture = 'capture-' : capture = ''
+
+          this.draggedElement.classList.add(this.endPositionID)     // update piece class   
+          this.gameArray = [...this.tempGameArray]                  // update game Array
+          this.dropped = true                                       //s ignal drop
+          this.playerGo = changePlayerGo(this.playerGo)             // change player go
+          this._UpdateChessboard()                                  // DO THIS LAST - commit changes to gameboard object
+
+          
+
+
+          console.log(`${this.boardID}: ${capture}${this.endPositionID}`)
+        } 
+        
+        else {
+          // vvvv -- IF DROPS ARE NOT VALID -- vvvv
+          this.tempGameArray = [...this.gameArray]
+          this.draggedElement.classList.add(this.startPositionID)
+          this.dropped = false 
+
+          console.log(`${this.boardID}: illegal-move`)
+        }
+  
+      } else {
+        
+        // vvvv -- IF DROPS ARE NOT WITHIN BOARD -- vvvv
+        console.log(`${this.boardID}: off-board`)
+        this.draggedElement.classList.add(this.startPositionID) 
+        this.tempGameArray = [...this.gameArray]
+        this.dropped = false
+      }
+    }
+    
+
+    // -- RESETTING VISUALS (HIGHLIGHTING SQUARES)
+    {
+      //this.dropped? this.MoveFromSquare.remove() :{}  // use if you want highlight square to stay on
+      this.MoveFromSquare.remove()
+      this.MoveToSquare.remove()
+      this.MoveToSquareOnClick.remove()
+
+      if(this.peicePickup) {
+
+        this.draggedElement.style = null
+        this.draggedElement.style.zIndex = null 
+      }
+    }
+
+    
+    // -- RESETTING VARIABLES -- DO THIS LAST
+    {
+      this.clickCount2 += 1
+      this.clickCount2 > 1 ? this.clickCount2 = 0 : {}
+      this.dragging = false
+      this.outOfBounds = undefined
+      this.peicePickup = false
+      this.startPositionID = undefined   
+      this.endPositionID = undefined    
+      this.draggedElement = undefined    
+      this.dropped = undefined  
+      //this.draggedPieceType = undefined  
+      //this.droppedPieceType = undefined 
+      //this.tempGameArray       
+      this.F1 = undefined                 
+      this.R1 = undefined               
+      this.F2 = undefined                
+      this.R2 = undefined  
+
     }
 
 
-    // -- RESETTING VARIABLES -- DO THIS LAST
-    this.dragging = false
-    this.peicePickup = false
-    this.startPositionID = undefined   
-    this.endPositionID = undefined    
-    this.draggedElement = undefined     
-    this.draggedPieceType = undefined  
-    this.droppedPieceType = undefined 
-    //this.tempGameArray       
-    this.F1 = undefined                 
-    this.R1 = undefined               
-    this.F2 = undefined                
-    this.R2 = undefined               
-
   }
+
+  
 
 }
 

@@ -19,7 +19,7 @@ export default class chessboard {
     this.boardImageURl = "src/chessboards/green_white.png"     // Location to board png, string
     this.pieceFolderURL = "src/peices/merida/"                 // Location to piece image folder, string 
     this.boardViewDir = 'white'                                // board direction, (black or white), string
-    this.playerGo                                              // player go, (black or white), string
+    this.playerGo = 'white'                                    // player go, (black or white), string
     this.gameArray          // offical game array layout, string Array
   
     // piece matrix is always populated from whites perspective. DON'T CHANGE, string array 
@@ -39,6 +39,8 @@ export default class chessboard {
     // --- instancing gamebaord
   
     const container = document.querySelector(containerID) 
+
+    
 
     //creating board container
     {
@@ -116,6 +118,7 @@ export default class chessboard {
           piece.append(pieceImage)
     
           //final actions
+
           this.gameBoard.append(piece)
         }
       })
@@ -138,6 +141,7 @@ export default class chessboard {
       this.tempGameArray = [...this.START_PIECES]
 
       this.gameBoard.addEventListener("pointerdown",this._passChessboard.bind(this))
+      document.addEventListener("UpdateChessBoard",this._recieveUpdate.bind(this))
 
       container.append(this.gameBoard)
     }
@@ -152,9 +156,19 @@ export default class chessboard {
     
   }
 
+  _recieveUpdate(e){
 
 
+    if(e.detail.boardID == this.boardID){
 
-    
+      this.gameBoard = e.detail.gameBoard;
+      this.boardViewDir = e.detail.boardViewDir;
+      this.playerGo = e.detail.playerGo;
+      this.gameArray = [...e.detail.gameArray];
+      //console.log(`${this.boardID}-recieved-update`);
+      
+    }
+
+  }
 
 }

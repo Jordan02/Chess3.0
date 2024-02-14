@@ -44,6 +44,19 @@
 
   }
 
+  #move-to-on-click {
+
+    position: absolute;
+    width: var(--square-width);
+    height: var(--square-width);
+    border: solid rgb(0, 180, 180) 0.3em; 
+    box-shadow: 0 0 0.7em rgb(0, 180, 180);
+    
+    box-sizing: border-box; 
+    z-index: 11;
+
+  }
+
   #move-from {
 
     position: absolute;
