@@ -1,45 +1,86 @@
 
-// todo: probably need to add out of bound error catches here?
-//  --- returns [file,row] from single array index of 64 element array
-export function returnArrayPos(pos){
+
+/**
+ * Returns file and row posistion from a single array index of a 64-element array.
+ * @param {number} pos - The single array position.
+ * @returns {Array<number>} An array where [0] represents file and [1] represents row.
+ * @todo Might need out-of-bounds error handling.
+ */
+export function IndexToPos(pos){
 
   const row = 7 - Math.floor((pos/8)) + 1
   const file = pos - Math.floor((pos/8))*8 + 1
+
   return [file,row]
+  //return {"file": file, "row" : row}
 
 }
 
-//  --- returns single array index of 64 element array ****
-export function returnSingleArrayPos(file,row)
+
+/**
+ * Calculates the single array position from given file and row numbers.
+ * @param {number} file - The file number.
+ * @param {number} row - The row number.
+ * @returns {number} The single array position calculated based on the file and row numbers.
+ */
+export function PosToIndex(file,row)
 {
   var F = file - 1
   var R = row - 1
   return (F + (7-R)*8)
 }
 
-//  --- we expect this function to recieve classes in the form FX-RX ****
-export function returnPiecePos(pieceClassID){
 
-  return [Number(pieceClassID[1]), Number(pieceClassID[4]) ]
+/**
+ * Extracts file and row numbers from the piece class ID.
+ * @param {string} pieceClassID - The piece class ID, e.g., "F1-R7".
+ * @returns {Array<number>} An array containing the file and row numbers extracted from the piece class ID.
+ */
+export function classToPos(pieceClassID) {
+  return [Number(pieceClassID[1]), Number(pieceClassID[4])];
+
 }
 
-//  --- creates text id from number index
-export function returnClassPos(file, rank){
 
-  var F
-  var R
-  file > 8 ? F = 8 : F = file
-  rank > 8 ? R = 8 : R = rank
-
-  return "F" + F.toString() + "-R" + R.toString()
+/**
+ * Converts file and rank number position to a piece class ID.
+ * @param {number} file - The file number.
+ * @param {number} rank - The rank number.
+ * @returns {string} The piece class ID.
+ */
+export function PosToClass(file, rank) {
+  
+  return "F" + file + "-R" + rank;
 }
 
-// --- returns boolean value if move from pos 1-2 is valid ****
+/**
+ * tests wheter coordinates are inside of baord or not
+ * @param {number} file - The file number.
+ * @param {number} rank - The rank number.
+ * @returns {boolean} boolean answer whether pos is out of the board bounds or not
+ */
+export function isBound(file, rank) {
+  
+  return !(file > 8 || file < 1 || rank > 8 || rank < 1)
+}
+
+
+
+/**
+ * Checks whether a move is valid or not 
+ * @param {number} F1 - Starting file number
+ * @param {number} R1 - Starting rank number
+ * @param {number} F2 - End file number, after move
+ * @param {number} R2 - End rank number, after move
+ * @param {Array<number>} newGameArray - temporary array of board posistion with move "F1,R1" -> "F2,R2" committed
+ * @param {Array<number>} gameArray - Current/Live array of board posistion without move "F1,R1" -> "F2,R2" committed
+ * @returns {boolean} Boolean value confirming wheter move "F1,R1" -> "F2,R2" is valid/ dosen't break chess rules
+ */
 export function isValid(F1, R1, F2, R2, newGameArray, gameArray) {
 
   // check if end position has a piece 
-  const endPosPieceType = gameArray[returnSingleArrayPos(F2,R2)]
-  const startPosPieceType = gameArray[returnSingleArrayPos(F1,R1)]
+  const endPosPieceType = gameArray[PosToIndex(F2,R2)]
+  const startPosPieceType = gameArray[PosToIndex(F1,R1)]
   
   if (endPosPieceType !== '' ) {
 
@@ -151,6 +192,17 @@ export function isValid(F1, R1, F2, R2, newGameArray, gameArray) {
 
 }
 
+
+/**
+ * Checks whether a move would result in a collision
+ * @param {number} F1 - Starting file number
+ * @param {number} R1 - Starting rank number
+ * @param {number} F2 - End file number, after move
+ * @param {number} R2 - End rank number, after move
+ * @param {Array<number>} newGameArray - temporary array of board posistion with move "F1,R1" -> "F2,R2" committed
+ * @param {Array<number>} gameArray - Current/Live array of board posistion without move "F1,R1" -> "F2,R2" committed
+ * @returns {boolean} Boolean value confirming wheter move "F1,R1" -> "F2,R2" iwould result in collosion
+ */
 export function testCollision(F1,R1,F2,R2,newGameArray, gameArray){
 
   let dx
@@ -170,7 +222,7 @@ export function testCollision(F1,R1,F2,R2,newGameArray, gameArray){
     // loop through all pos between start and end, and break if piece is encounted
     while ( y !== R2) {
 
-      var a = gameArray[returnSingleArrayPos(x,y)] // checking if square has a peice
+      var a = gameArray[PosToIndex(x,y)] // checking if square has a peice
       if (a !== '') {return 1} // if there is a peice, break
       y+=dy
     }
@@ -187,7 +239,7 @@ export function testCollision(F1,R1,F2,R2,newGameArray, gameArray){
     // loop through all pos between start and end, and break if piece is encounted
     while ( x !== F2) {
 
-      var a = gameArray[returnSingleArrayPos(x,y)] // checking if square has a peice
+      var a = gameArray[PosToIndex(x,y)] // checking if square has a peice
       if (a !== '') {return 1} // if there is a peice, break
       x+=dx
     }
@@ -206,7 +258,7 @@ export function testCollision(F1,R1,F2,R2,newGameArray, gameArray){
     // loop through all pos between start and end, and break if piece is encounted
     while ( x !== F2) {
 
-      var a = gameArray[returnSingleArrayPos(x,y)] // checking if square has a peice
+      var a = gameArray[PosToIndex(x,y)] // checking if square has a peice
       if (a !== '') {return 1} // if there is a peice, break
 
       x+=dx
@@ -220,20 +272,325 @@ export function testCollision(F1,R1,F2,R2,newGameArray, gameArray){
   return 0
 }
 
+/**
+ * returns the x and y coordinates relative to top left of board image (down = pos, right = pos), and if the result is out of board frame
+ * @param {event} e - Starting file number
+ * @param {HTMLImageElement} board_img - Starting rank number
+ * @returns {Array<number>} [0]= x coord, [1] = y coord, [2] = boolean for if out of bounds
+ */
+export function getBoardXY(e, board_img){
+
+  var outOfBounds
+  const x = e.clientX - board_img.getBoundingClientRect().left;
+  const y = e.clientY - board_img.getBoundingClientRect().top;
+
+  //out of bounds tests
+  const a = (x > board_img.clientWidth)  || (x < 0)  //x-axis
+  const b = (y > board_img.clientHeight) || (y < 0)  //y-axis
+
+  a||b? outOfBounds = 1 : outOfBounds = 0
+
+  //console.log(x,y,outOfBounds)
+  return [x,y,outOfBounds]
+}
+
+/**
+ * returns the file and rank posistion, WILL NOT be bound to board size. E.g F-2 R10 is possible
+ * @param {event} e - Starting file number
+ * @param {HTMLImageElement} board_img - Starting rank number
+ * @param {string} board_dir - board perspective, either 'white' or 'black'
+ * @returns {Array<number>} [0]= File number, [1] = Rank number
+ */
+export function getBoardFR(e,board_img,board_dir) {
+
+  var outOfBounds
+  const x = e.clientX - board_img.getBoundingClientRect().left;
+  const y = e.clientY - board_img.getBoundingClientRect().top;
+
+  //out of bounds tests
+  const a = (x > board_img.clientWidth)  || (x < 0)  //x-axis
+  const b = (y > board_img.clientHeight) || (y < 0)  //y-axis
+
+  a||b? outOfBounds = 1 : outOfBounds = 0
 
 
-export function tryCapture(){
+  if(board_dir == "white") {
+  
+    var file = Math.floor(x*8/(board_img.clientWidth)) + 1
+    var rank = 8 - Math.floor(y*8/(board_img.clientHeight))
 
-  const targetPeice = gameBoard.getElementsByClassName(endPositionID)[0]
+  } else {
+    
+    var file = Math.abs(Math.floor(x*8/board_img.clientWidth) - 7) + 1
+    var rank = Math.floor(y*8/(board_img.clientHeight)) + 1
+  }
 
-  if (targetPeice == undefined) {return 0} //if it is empty, break
+  return [file,rank]
+}
 
-  else {
+/**
+ * returns the file and rank posistion, Bound to 8x8 board 
+ * @param {event} e - event object
+ * @param {HTMLImageElement} board_img - Starting rank number
+ * @param {string} board_dir - board perspective, either 'white' or 'black'
+ * @returns {Array<number>} [0]= File number, [1] = Rank number
+ */
+export function getAbsBoardFR(e,board_img,board_dir) {
 
-    // remove peice
-    targetPeice.remove()
-    return 1
+  var outOfBounds
+  const x = e.clientX - board_img.getBoundingClientRect().left;
+  const y = e.clientY - board_img.getBoundingClientRect().top;
+
+  //out of bounds tests
+  const a = (x > board_img.clientWidth)  || (x < 0)  //x-axis
+  const b = (y > board_img.clientHeight) || (y < 0)  //y-axis
+
+  a||b? outOfBounds = 1 : outOfBounds = 0
+
+
+  if(board_dir == "white") {
+  
+    var file = Math.floor(x*8/(board_img.clientWidth)) + 1
+    var rank = 8 - Math.floor(y*8/(board_img.clientHeight))
+
+  } else {
+    
+    var file = Math.abs(Math.floor(x*8/board_img.clientWidth) - 7) + 1
+    var rank = Math.floor(y*8/(board_img.clientHeight)) + 1
+  }
+
+  file > 8 ? file = 8 : {}
+  file < 1 ? file = 1 : {}
+  rank > 8 ? rank = 8 : {}
+  rank < 1 ? rank = 1 : {}
+
+  return [file,rank]
+}
+
+
+/**
+ * returns cursor position for piece, bound to the gameboard image 
+ * @param {event} e - event object
+ * @param {HTMLImageElement} board_img - Starting rank number
+ * @param {number} offsetX_percent - manual Y adjustment, relative to 1 square as a %
+ * @param {number} offsetY_percent - manual Y adjustment, relative to 1 square as a %
+ * @returns {Array<number>} [0]= board bound cursor position from left (px), [0]= board bound cursor position from top (px)
+ */
+export function boundDrag(e, board_img, offsetX_percent, offsetY_percent){
+
+  const squareWidth = board_img.clientWidth/8
+  const offsetX = (offsetX_percent/100) * squareWidth
+  const offsetY = (offsetY_percent/100) * squareWidth
+
+  var x = e.clientX - board_img.getBoundingClientRect().left + offsetX
+  var y = e.clientY - board_img.getBoundingClientRect().top + offsetY
+
+  if (x  > board_img.clientWidth) {x = board_img.clientWidth}
+  if (x  < 0) {x = 0}
+  if (y  > board_img.clientHeight) {y = board_img.clientHeight}
+  if (y  < 0) {y = 0}
+
+  x = x +'px'
+  y = y +'px'
+  
+  return[x,y]
+}
+
+
+
+export class chess_controller {
+
+  selfRef = this
+  
+  constructor(){
+
+    document.addEventListener("passValue",this._recieveChessboard.bind(this))
+    document.addEventListener("pointerdown",this._start.bind(this))
+    document.addEventListener("pointermove",this._move.bind(this))
+    document.addEventListener("pointercancal",this._end.bind(this))
+    document.addEventListener("pointerup",this._end.bind(this))
+
+    //gameboard variables
+    this.boardID = undefined  // Board ID, String
+    this.gameBoard            // container for gameboard, </div> object
+    this.boardImage           // container for board image, </img> object
+    this.boardImageURl        // Location to board png, string
+    this.pieceFolderURL       // Location to piece image folder, string 
+    this.boardViewDir         // board direction, (black or white), string
+    this.playerGo             // player go, (black or white), string
+    this.gameArray            // offical game array layout, string Array
+    
+    //controller variables
+    this.dragging
+    this.startPositionID    // MoveFrom square [F]ileX-[R]owX sytax, string
+    this.endPositionID      // MoveTo square [F]ileX-[R]owX sytax, string
+    this.draggedElement     // Piece element being moved, </piece> or </div> object
+    this.draggedPieceType   // Dragged piece type, string
+    this.droppedPieceType   // Dropped square piece type, string
+    this.tempGameArray      // temporary board array to allows attemepted moves to be verified, string Array 
+    this.F1                 // MoveFrom Square file, int
+    this.R1                 // MoveFrom Square rank, int 
+    this.F2                 // MoveTo Square file, int
+    this.R2                 // MoveTo Square file, int
+    this.peicePickup 
+
+    //visual variables
+
+    this.MoveFromSquare = document.createElement("div")
+    this.MoveFromSquare.setAttribute("id","move-from")
+
+    this.MoveToSquare = document.createElement("div")
+    this.MoveToSquare.setAttribute("id","move-to")
+    
+  }
+
+
+  _recieveChessboard(e){
+
+    if(e.detail.boardID !== this.boardID) {
+
+      this.boardID = e.detail.boardID;
+      this.gameBoard = e.detail.gameBoard;
+      this.boardImage = e.detail.boardImage;
+      this.boardImageURl = e.detail.boardImageURl;
+      this.pieceFolderURL = e.detail.pieceFolderURL;
+      this.boardViewDir = e.detail.boardViewDir;
+      this.playerGo = e.detail.playerGo;
+      this.gameArray = e.detail.gameArray;
+    }
+
+  }
+
+  _start(e){
+
+    console.log("_start")
+    this.dragging = true
+
+    if(this.boardID == undefined) return;         // ABORT upon start, if no boardID has been clicked on
+    if(getBoardXY(e,this.boardImage)[2]) return;  // ABORT if cursor is out of bounds
+    
+    // -- UPDATING VARIABLES --
+    this.MoveFromSquare.classList.remove(this.startPositionID)
+    this.F1 = getBoardFR(e,this.boardImage,this.boardViewDir)[0]
+    this.R1 = getBoardFR(e,this.boardImage,this.boardViewDir)[1]
+    this.startPositionID = PosToClass(this.F1,this.R1)
+    this.draggedElement = this.gameBoard.querySelector("." + this.startPositionID)
+    this.draggedPieceType = this.gameArray[PosToIndex(this.F1,this.R1)]
+    this.draggedElement == undefined ? this.peicePickup = false : this.peicePickup = true
+
+    // -- WHEN A PIECE HAS BEEN SELECTED
+    if(!this.peicePickup) return;   // ABORT if no peice is selected
+
+    console.log(this.startPositionID)
+
+    // add highlight square
+    this.MoveFromSquare.className = ""
+    this.MoveFromSquare.classList.add(this.startPositionID)
+    this.gameBoard.append(this.MoveFromSquare)
+
+  }
+
+  _move(e){
+
+    if(this.boardID == undefined) return;           // ABORT upon start, if no boardID has been clicked on
+    if(!this.dragging) return;                      // ABORT when _end is run, and turn dragging off
+    if(this.draggedElement ==  undefined) return;   // ABORT if piece not selected, ABORT
+    
+  
+    // -- HIGHLIGHTING MOVE TO SQUARE, (if cursor is bound to board)
+    if(!getBoardXY(e,this.boardImage)[2]) {
+
+      const moveToPos = getBoardFR(e,this.boardImage,this.boardViewDir)        // get file rank location
+      const MoveToClass = PosToClass(moveToPos[0],moveToPos[1])                // create dragover class
+      this.MoveToSquare.className = ""                                         // remove all classes
+      this.MoveToSquare.classList.add(MoveToClass)                             // update highlight square
+      this.gameBoard.append(this.MoveToSquare)                                 // append object
+
+    } else {
+
+      this.MoveToSquare.remove()
+    }
+
+    // -- DRAGGING PIECE VISUAL UPDATE
+    this.draggedElement.style.zIndex = 100                       // put piece in front
+    this.draggedElement.classList.remove(this.startPositionID)   // temp removal of square class
+    const dragCoord = boundDrag(e,this.boardImage,12,0)          // get bound coordinates 
+    this.draggedElement.style.left = dragCoord[0]
+    this.draggedElement.style.top = dragCoord[1]
+    
+   
+    //console.log(getAbsBoardFR(e,this.boardImage,this.boardViewDir))
+    
+  }
+
+  _end(e) {
+    
+    console.log("_end")
+    if(!this.peicePickup) return;   // ABORT if no peice is selected
+
+    // -- RESETTING VISUALS (HIGHLIGHTING SQUARES)
+    this.MoveFromSquare.remove()
+    this.MoveToSquare.remove()
+    
+    if(this.draggedElement !== undefined) {
+
+      this.draggedElement.style = null
+      this.draggedElement.style.zIndex = null 
+    }
+
+    // -- UPDATING PIECE POSISTION MOVE IS BOUND TO BOARD
+
+    if(!getBoardXY(e,this.boardImage)[2]) {
+
+      const draggedCoord = getBoardFR(e,this.boardImage,this.boardViewDir)
+      this.F2 = draggedCoord[0]
+      this.R2 = draggedCoord[1]
+      this.endPositionID = PosToClass(this.F2,this.R2)
+      console.log(this.endPositionID)
+      this.draggedElement.classList.add(this.endPositionID) 
+
+    } else {
+
+      console.log("Off-Board")
+      this.draggedElement.classList.add(this.startPositionID) 
+    }
+
+
+    // -- RESETTING VARIABLES -- DO THIS LAST
+    this.dragging = false
+    this.peicePickup = false
+    this.startPositionID = undefined   
+    this.endPositionID = undefined    
+    this.draggedElement = undefined     
+    this.draggedPieceType = undefined  
+    this.droppedPieceType = undefined 
+    //this.tempGameArray       
+    this.F1 = undefined                 
+    this.R1 = undefined               
+    this.F2 = undefined                
+    this.R2 = undefined               
+
   }
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+function test(){
+
+
+}
+
+
+test()

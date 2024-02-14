@@ -5,8 +5,8 @@ piece {
 
    width: var(--square-width);
    height: var(--square-width);
-   z-index: 1;
-   /* background-color: red; */
+   z-index: 15;
+   pointer-events: none;
 }
 
 .pieceIcon{
@@ -17,7 +17,7 @@ piece {
    height: var(--piece-scaled);
    top: var(--centre-align-offset);
    left: var(--centre-align-offset);
-   user-select: non;
+   pointer-events: none;
 }
 
 .F1-R1 {transform: translate(calc(var(--square-width)* 7), calc(var(--square-width)* 0))  }

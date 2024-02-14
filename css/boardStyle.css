@@ -5,6 +5,7 @@
   --square-width: calc(var(--gameboard-width)/8);
   --piece-scaled: calc(var(--square-width) * 0.93);
   --centre-align-offset: calc((var(--square-width) - var(--piece-scaled))/2);
+  --highlight-border: calc(var(width)*0.25)px
   
   }
   
@@ -17,9 +18,7 @@
     z-index: 0;
     padding: 40px;
     
-  
   }
-  
   
   .chessboard {
   
@@ -27,6 +26,7 @@
     width: inherit;
     height: inherit;
     box-shadow: 5px 5px 10px black;
+    pointer-events: none;
     /* border-radius: 4%; */
   
   }
@@ -36,11 +36,11 @@
     position: absolute;
     width: var(--square-width);
     height: var(--square-width);
-    border: solid rgba(255, 255, 0, 1) 0.3em; 
-    box-shadow: 0 0 0.7em rgb(255, 255, 0);
+    border: solid rgb(0, 255, 255) 0.3em; 
+    box-shadow: 0 0 0.7em rgb(0, 255, 255);
     
     box-sizing: border-box; 
-    z-index: 10;
+    z-index: 11;
 
   }
 
@@ -50,9 +50,8 @@
     width: var(--square-width);
     height: var(--square-width);
     
-    background-color: rgba(255, 255, 0, 0.4);
+    background-color: rgba(0, 255, 255, 0.4);
   
     box-sizing: border-box; 
     z-index: 10;
-
   }
